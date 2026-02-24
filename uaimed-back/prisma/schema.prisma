@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id            String        @id @default(uuid())
+  nome          String
+  email         String        @unique
+  cpf           String        @unique
+  telefone      String
+  senha         String
+  tipo          String        @default("paciente")
+  avatar        String?
+  ativo         Boolean       @default(true)
+  criado_em     DateTime      @default(now())
+  atualizado_em DateTime      @updatedAt
+  agendamentos  Agendamento[]
+  avaliacoes    Avaliacao[]
+  contatos      Contato[]
+  pagamentos    Pagamento[]
+  profissional  Profissional?
+
+  @@map("usuarios")
+}
+
+model Profissional {
+  id            String        @id @default(uuid())
+  usuarioId     String        @unique
+  especialidade String
+  crm           String        @unique
+  dataFormacao  DateTime
+  endereco      String
+  cidade        String
+  estado        String
+  cep           String
+  criado_em     DateTime      @default(now())
+  atualizado_em DateTime      @updatedAt
+  agendamentos  Agendamento[]
+  avaliacoes    Avaliacao[]
+  contatos      Contato[]
+  usuario       Usuario       @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@map("profissionais")
+}
+
+model Agendamento {
+  id             String       @id @default(uuid())
+  usuarioId      String
+  profissionalId String
+  dataHora       DateTime
+  duracao        Int          @default(30)
+  status         String       @default("agendado")
+  observacoes    String?
+  criado_em      DateTime     @default(now())
+  atualizado_em  DateTime     @updatedAt
+  profissional   Profissional @relation(fields: [profissionalId], references: [id], onDelete: Cascade)
+  usuario        Usuario      @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  pagamento      Pagamento?
+
+  @@map("agendamentos")
+}
+
+model Avaliacao {
+  id             String       @id @default(uuid())
+  usuarioId      String
+  profissionalId String
+  nota           Int
+  comentario     String?
+  criado_em      DateTime     @default(now())
+  atualizado_em  DateTime     @updatedAt
+  profissional   Profissional @relation(fields: [profissionalId], references: [id], onDelete: Cascade)
+  usuario        Usuario      @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@map("avaliacoes")
+}
+
+model Contato {
+  id             String       @id @default(uuid())
+  usuarioId      String
+  profissionalId String
+  assunto        String
+  mensagem       String
+  status         String       @default("nao_lido")
+  criado_em      DateTime     @default(now())
+  atualizado_em  DateTime     @updatedAt
+  profissional   Profissional @relation(fields: [profissionalId], references: [id], onDelete: Cascade)
+  usuario        Usuario      @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@map("contatos")
+}
+
+model Pagamento {
+  id            String      @id @default(uuid())
+  usuarioId     String
+  agendamentoId String      @unique
+  valor         Float
+  desconto      Float       @default(0)
+  valorFinal    Float
+  metodo        String
+  status        String      @default("pendente")
+  cartaoFinal   String?
+  pixChave      String?
+  pixQrCode     String?
+  cupom         String?
+  criado_em     DateTime    @default(now())
+  atualizado_em DateTime    @updatedAt
+  agendamento   Agendamento @relation(fields: [agendamentoId], references: [id], onDelete: Cascade)
+  usuario       Usuario     @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@map("pagamentos")
+}
+
+model Cupom {
+  id            String   @id @default(uuid())
+  codigo        String   @unique
+  desconto      Int
+  dataExpiracao DateTime
+  ativo         Boolean  @default(true)
+  usosLimite    Int?
+  usosAtuais    Int      @default(0)
+  criado_em     DateTime @default(now())
+  atualizado_em DateTime @updatedAt
+
+  @@map("cupons")
+}
