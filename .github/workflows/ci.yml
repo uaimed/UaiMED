@@ -19,9 +19,9 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        run: npm ci
+        run: cd uaimed-front && npm ci
 
       - name: Run tests (CI script)
         env:
           DATABASE_URL: file:./dev-test.db
-        run: npm run test:ci
+        run: cd uaimed-front && npm run test:ci
