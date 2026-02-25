@@ -17,11 +17,14 @@ jobs:
         with:
           node-version: 22
           cache: "npm"
+          cache-dependency-path: "uaimed-front/package-lock.json"
 
       - name: Install dependencies
+        working-directory: ./uaimed-front
         run: npm ci
 
       - name: Run tests (CI script)
         env:
           DATABASE_URL: file:./dev-test.db
+        working-directory: ./uaimed-front
         run: npm run test:ci
