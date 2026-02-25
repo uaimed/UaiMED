@@ -54,8 +54,8 @@ describe('Contatos API', () => {
       .expect(200);
 
     expect(Array.isArray(listRes.body)).toBe(true);
-    // look for a contato matching the profissionalId and assunto — more robust across parallel runs
-    const found = listRes.body.find((c: any) => c.profissionalId === profissional.id && c.assunto === 'Teste');
+    // look for the specific contato by its id returned on creation
+    const found = listRes.body.find((c: any) => c.id === res.body.id);
     expect(found).toBeDefined();
   });
 });
